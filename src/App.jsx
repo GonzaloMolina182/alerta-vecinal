@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMapEvents,
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
-// Fix íconos leaflet en React
 import L from "leaflet";
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
@@ -16,6 +21,16 @@ let DefaultIcon = L.icon({
   iconSize: [25, 41],
 });
 L.Marker.prototype.options.icon = DefaultIcon;
+
+function LocationSelector({ setLat, setLng }) {
+  useMapEvents({
+    click(e) {
+      setLat(e.latlng.lat);
+      setLng(e.latlng.lng);
+    },
+  });
+  return null;
+}
 
 export default function App() {
   const [reportes, setReportes] = useState([]);
@@ -77,7 +92,7 @@ export default function App() {
       return;
     }
     if (lat === null || lng === null) {
-      alert("Primero obtené tu ubicación");
+      alert("Primero elegí u obtené tu ubicación");
       return;
     }
 
@@ -103,8 +118,19 @@ export default function App() {
   }
 
   return (
-    <div style={{ padding: "2rem", fontFamily: "Arial, sans-serif", maxWidth: 1200, margin: "0 auto" }}>
-      <h1 style={{ fontSize: "2rem", textAlign: "center", marginBottom: "1rem" }}>📢 Alerta Vecinal</h1>
+    <div
+      style={{
+        padding: "2rem",
+        fontFamily: "Arial, sans-serif",
+        maxWidth: 1200,
+        margin: "0 auto",
+      }}
+    >
+      <h1
+        style={{ fontSize: "2rem", textAlign: "center", marginBottom: "1rem" }}
+      >
+        📢 Alerta Vecinal
+      </h1>
 
       <form onSubmit={enviarReporte} style={{ marginBottom: "1.5rem" }}>
         <input
@@ -121,23 +147,30 @@ export default function App() {
           onChange={(e) => setMensaje(e.target.value)}
           style={{ marginRight: 10, padding: 8, width: 280 }}
         />
-        <button type="button" onClick={obtenerUbicacion} style={{ marginRight: 10, padding: "8px 12px" }}>
-          Obtener ubicación
+        <button
+          type="button"
+          onClick={obtenerUbicacion}
+          style={{ marginRight: 10, padding: "8px 12px" }}
+        >
+          Obtener ubicación real
         </button>
-        <button type="submit" style={{ padding: "8px 12px" }}>Enviar</button>
+        <button type="submit" style={{ padding: "8px 12px" }}>
+          Enviar
+        </button>
       </form>
 
       <div style={{ height: "500px", marginBottom: "2rem" }}>
         <MapContainer
           center={[-34.61, -58.38]}
-          zoom={12}
+          zoom={10}
           style={{ height: "100%", width: "100%" }}
           scrollWheelZoom={true}
         >
           <TileLayer
-            attribution='&copy; OpenStreetMap'
+            attribution="&copy; OpenStreetMap"
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+          <LocationSelector setLat={setLat} setLng={setLng} />
           {reportes.map((r) =>
             r.lat && r.lng ? (
               <Marker key={r.id} position={[r.lat, r.lng]}>
@@ -151,27 +184,39 @@ export default function App() {
           )}
           {lat && lng && (
             <Marker position={[lat, lng]}>
-              <Popup>Tu ubicación actual</Popup>
+              <Popup>Ubicación seleccionada</Popup>
             </Marker>
           )}
         </MapContainer>
       </div>
 
-      {/* Sección de Números de Emergencia */}
       <section style={{ marginBottom: "2rem" }}>
-        <h2 style={{ borderBottom: "2px solid #ccc", paddingBottom: "0.5rem" }}>📞 Números de Emergencia</h2>
+        <h2 style={{ borderBottom: "2px solid #ccc", paddingBottom: "0.5rem" }}>
+          📞 Números de Emergencia
+        </h2>
         <ul style={{ lineHeight: "1.8" }}>
-          <li><strong>Defensa Civil:</strong> 103</li>
-          <li><strong>Bomberos:</strong> 100</li>
-          <li><strong>Policía:</strong> 911</li>
-          <li><strong>SAME (Emergencias médicas):</strong> 107</li>
-          <li><strong>Línea gratuita de Provincia:</strong> 147</li>
+          <li>
+            <strong>Defensa Civil:</strong> 103
+          </li>
+          <li>
+            <strong>Bomberos:</strong> 100
+          </li>
+          <li>
+            <strong>Policía:</strong> 911
+          </li>
+          <li>
+            <strong>SAME (Emergencias médicas):</strong> 107
+          </li>
+          <li>
+            <strong>Línea gratuita de Provincia:</strong> 147
+          </li>
         </ul>
       </section>
 
-      {/* Sección de Consejos de Seguridad */}
       <section>
-        <h2 style={{ borderBottom: "2px solid #ccc", paddingBottom: "0.5rem" }}>💧 Cómo protegerte en caso de inundación</h2>
+        <h2 style={{ borderBottom: "2px solid #ccc", paddingBottom: "0.5rem" }}>
+          💧 Cómo protegerte en caso de inundación
+        </h2>
         <ul style={{ lineHeight: "1.8" }}>
           <li>📍 Evitá zonas bajas y calles inundadas.</li>
           <li>🔌 Desconectá la energía eléctrica si hay riesgo de que el agua ingrese a tu casa.</li>
